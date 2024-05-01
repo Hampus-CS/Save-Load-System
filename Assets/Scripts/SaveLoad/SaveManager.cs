@@ -1,4 +1,3 @@
-using System;
 using Newtonsoft.Json;
 using System.IO;
 using UnityEngine;
@@ -10,13 +9,15 @@ public static class SaveManager
 
     public static SaveProfile<T> Load<T>(string profileName) where T : SaveProfileData
     {
+        string filePath = $"{saveFolder}/{profileName}";
+        if (!File.Exists(filePath))
+        {
+            Debug.LogWarning($"Save Profile {profileName} not found!");
+            return null; // Return null to indicate the file was not found
+        }
 
-        if (!File.Exists($"{saveFolder}/{profileName}"))
-            throw new Exception($"Save Profile {profileName} not found!");
-
-        var fileContents = File.ReadAllText($"{saveFolder}/{profileName}");
-        //decrypt
-        Debug.Log($"Successfully loaded {saveFolder}/{profileName}");
+        var fileContents = File.ReadAllText(filePath);
+        Debug.Log($"Successfully loaded {filePath}");
         return JsonConvert.DeserializeObject<SaveProfile<T>>(fileContents);
     }
 
@@ -35,9 +36,13 @@ public static class SaveManager
     public static void Delete(string profileName)
     {
         if (!File.Exists($"{saveFolder}/{profileName}"))
-            throw new Exception($"Save Profile {profileName} not found!");
+        {
+            Debug.LogWarning($"Save Profile {profileName} not found!");
+        }
+        
         Debug.Log($"Successfully deleted {saveFolder}/{profileName}");
         string filePath = $"{saveFolder}/{profileName}";
+        
         if (File.Exists(filePath))
         {
             File.Delete(filePath);
